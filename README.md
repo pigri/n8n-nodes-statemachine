@@ -1,47 +1,53 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-statemachine
 
-# n8n-nodes-starter
+![n8n.io - Workflow Automation](https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png)
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](n8n.io). It includes the node linter and other dependencies.
+[n8n](https://www.n8n.io) "simple" state machine is storing your nodes/workflow state globally or workflow level
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+## What is the state machine?
+A state machine refers to a programming concept where an application or workflow is divided into a series of states or steps, and the program progresses from one state to the next based on certain conditions or triggers.
 
-## Prerequisites
+## How to install
 
-You need the following installed on your development machine:
+### Community Nodes (Recommended)
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 16. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-	```
-	npm install n8n -g
-	```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+1. Go to **Settings > Community Nodes**.
+2. Select **Install**.
+3. Enter `n8n-nodes-statemachine` in **Enter npm package name**.
+4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes: select **I understand the risks of installing unverified code from a public source**.
+5. Select **Install**.
+
+After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
+
+### Manual installation
+
+To get started install the package in your n8n root directory:
+
+`npm install n8n-nodes-statemachine`
+
+For Docker-based deployments, add the following line before the font installation command in your [n8n Dockerfile](https://github.com/n8n-io/n8n/blob/master/docker/images/n8n/Dockerfile):
+
+`RUN cd /usr/local/lib/node_modules/n8n && npm install n8n-nodes-statemachine`
+
+### How to use
+
+- This node has one external depedency is you need a redis service. You can find a free redis service [here](https://redis.com/redis-enterprise-cloud/pricing/)
+- My suggestion is 1 trigger 1 state machine
+- Always use error handler node in your workflow
+
+## Demo
+
+### Working well
+- ![1st run](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/1st_run.png)
+- ![2nd run](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/2nd_run.png)
+
+### Error handling
+- ![error](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/1st_run.png)
+- ![error_handling](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/2nd_run.png)
 
 
-## Using this starter
+## Errors
+If you have any error, please open an issue on [Github](https://github.com/pigri/n8n-nodes-statemachine)
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-    ```
-    git clone https://github.com/<your organization>/<your-repo-name>.git
-    ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
 
-## More information
-
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
-
-## License
-
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
