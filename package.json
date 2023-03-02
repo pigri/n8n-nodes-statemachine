@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-statemachine",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A simple state machine refers to a programming concept where an application or workflow is divided into a series of states or steps, and the program progresses from one state to the next based on certain conditions or triggers",
   "keywords": [
     "n8n-community-node-package",
@@ -8,7 +8,7 @@
     "statemachine",
     "state"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "homepage": "https://github.com/pigri/n8n-nodes-statemachine",
   "author": {
     "name": "David Papp",
@@ -22,10 +22,10 @@
   "scripts": {
     "build": "tsc && gulp build:icons",
     "dev": "tsc --watch",
-    "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+    "format": "prettier nodes --write",
+    "lint": "eslint nodes package.json",
+    "lintfix": "eslint nodes package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json"
   },
   "files": [
     "dist"

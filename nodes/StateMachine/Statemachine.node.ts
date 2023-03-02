@@ -48,6 +48,18 @@ export class Statemachine implements INodeType {
 						description: 'Set the value of you want to store in state',
 						action: 'Set the value of you want to store in state',
 					},
+					{
+						name: 'Clean',
+						value: 'clean',
+						description: 'Clean the stored value from the state',
+						action: 'Clean the stored value from the state',
+					},
+					{
+						name: 'Error Handling',
+						value: 'error_handling',
+						description: 'If your workflow has an error, this mode can handle it',
+						action: 'If your workflow has an error this mode can handle it',
+					},
 				],
 				default: 'store',
 			},
@@ -61,7 +73,7 @@ export class Statemachine implements INodeType {
 				type: 'string',
 				displayOptions: {
 					show: {
-						operation: ['store'],
+						operation: ['store', 'clean'],
 					},
 				},
 				default: '',
@@ -69,12 +81,31 @@ export class Statemachine implements INodeType {
 				description: 'Name of the key to get from Redis',
 			},
 			{
+				displayName: 'Execution ID',
+				name: 'executionId',
+				type: 'hidden',
+				required: true,
+				default: '={{ $execution.id }}',
+			},
+			{
+				displayName: 'Previous Execution ID',
+				name: 'previousExecutionId',
+				type: 'string',
+				displayOptions: {
+					show: {
+						operation: ['error_handling'],
+					},
+				},
+				required: true,
+				default: '',
+			},
+			{
 				displayName: 'Global Statement',
 				name: 'global',
 				type: 'boolean',
 				displayOptions: {
 					show: {
-						operation: ['store'],
+						operation: ['store', 'clean'],
 					},
 				},
 				default: true,
@@ -195,7 +226,8 @@ export class Statemachine implements INodeType {
 			}
 
 			const client = redis.createClient(redisOptions);
-
+			const operation = this.getNodeParameter('operation', 0);
+			const executionId = this.getNodeParameter('executionId', 0);
 			client.on('error', (err: Error) => {
 				client.quit();
 				reject(err);
@@ -210,34 +242,63 @@ export class Statemachine implements INodeType {
 					let item: INodeExecutionData;
 					for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 						item = { json: {} };
-						const value = this.getNodeParameter('value', itemIndex) as string;
-						const expire = this.getNodeParameter('expire', itemIndex, false) as boolean;
-						const global = this.getNodeParameter('global', itemIndex, false) as boolean;
+						if (operation === 'store' || operation === 'clean') {
+							const value = this.getNodeParameter('value', itemIndex) as string;
+							const global = this.getNodeParameter('global', itemIndex, false) as boolean;
+							const hash = crypto.createHash('sha256');
+							hash.update(JSON.stringify(value));
+							let key;
+							if (global) {
+								key = `n8n-state-global-${hash.digest('hex')}`;
+							} else {
+								key = `n8n-state-workflow-${meta.id}-${hash.digest('hex')}`;
+							}
 
-						const ttl = this.getNodeParameter('ttl', itemIndex, -1) as number;
+							if (operation === 'store') {
+								const data = (await getValue(client, key)) || null;
 
-						const hash = crypto.createHash('sha256');
-						hash.update(JSON.stringify(value));
-						let key;
-						if (global) {
-							key = `n8n-state-global-${hash.digest('hex')}`;
-						} else {
-							key = `n8n-state-workflow-${meta.id}-${hash.digest('hex')}`;
+								if (data === null) {
+									const expire = this.getNodeParameter('expire', itemIndex, false) as boolean;
+									const ttl = this.getNodeParameter('ttl', itemIndex, -1) as number;
+
+									await setValue(client, key, value, expire, ttl);
+									item.json.state = value;
+									const clientPush = util.promisify(client.LPUSH).bind(client);
+									// @ts-ignore: typescript not understanding generic function signatures
+									await clientPush(`${meta.id}-${executionId}`, key);
+									returnItems.push(item);
+								} else {
+									break;
+								}
+							} else if (operation === 'clean') {
+								const clientDel = util.promisify(client.del).bind(client);
+								// @ts-ignore
+								await clientDel(key);
+							}
 						}
+						if (operation === 'error_handling') {
+							const previousExecutionId = this.getNodeParameter(
+								'previousExecutionId',
+								itemIndex,
+							) as string;
 
-						const data = (await getValue(client, key)) || null;
+							const clientLLen = util.promisify(client.LLEN).bind(client);
+							const keysRange = await clientLLen(`${meta.id}-${previousExecutionId}`);
 
-						if (data === null) {
-							await setValue(client, key, value, expire, ttl);
-							item.json.state = value;
-							returnItems.push(item);
-						} else {
-							break;
+							for (let keyIndex = 0; keyIndex < keysRange; keyIndex++) {
+								const clientLindex = util.promisify(client.lindex).bind(client);
+								const keyName = await clientLindex(`${meta.id}-${previousExecutionId}`, keyIndex);
+
+								const clientDel = util.promisify(client.del).bind(client);
+								// @ts-ignore
+								await clientDel(keyName);
+							}
 						}
 					}
 					client.quit();
 					resolve(this.prepareOutputData(returnItems));
 				} catch (error) {
+					console.log(error);
 					reject(error);
 				}
 			});
