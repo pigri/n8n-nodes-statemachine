@@ -42,8 +42,8 @@ For Docker-based deployments, add the following line before the font installatio
 - ![2nd run](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/2nd_run.png)
 
 ### Error handling
-- ![error](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/1st_run.png)
-- ![error_handling](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/2nd_run.png)
+- ![error](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/error.png)
+- ![error_handling](https://raw.githubusercontent.com/pigri/n8n-nodes-statemachine/master/assets/error_handling.png)
 
 
 ## Errors
