@@ -40,10 +40,10 @@ For Docker-based deployments, add the following line before the font installatio
 The StateMachine node supports the following operations:
 
 ### Check&Store (Default)
-**Default operation.** Checks if a value is already stored in the state. If not, stores it. This prevents duplicate processing by ensuring each unique value is only processed once.
+**Default operation.** Checks if a value is already stored in the state. If the value doesn't exist, it stores it and returns the stored value. If the value already exists, it returns `false` in the state field, allowing your workflow to continue and handle the duplicate case. This prevents duplicate processing while giving you control over how to handle existing values.
 
 ### Clean
-Removes a specific stored value from the state using the provided value/key.
+Removes a specific stored value from the state using the provided value/key. Returns `true` in the state field if the key was deleted, `false` if it didn't exist.
 
 ### Error Handling
 Handles errors in your workflow by cleaning up state from a previous execution. Requires the previous execution ID to identify and remove state entries from failed runs.
@@ -52,7 +52,7 @@ Handles errors in your workflow by cleaning up state from a previous execution. 
 Checks if a value already exists in the state without storing it. Returns a boolean indicating whether the value is present.
 
 ### Get
-Retrieves a stored value from the state without modifying it.
+Retrieves a stored value from the state without modifying it. Returns the value if found, or `false` if the key doesn't exist.
 
 ### Purge
 Removes all stored values from the state, either globally or at the workflow level. Returns the number of keys deleted.
