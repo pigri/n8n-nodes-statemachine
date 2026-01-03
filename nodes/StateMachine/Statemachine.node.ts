@@ -261,7 +261,13 @@ export class Statemachine implements INodeType {
 					const deleted = await client.del(key);
 					item.json.state = deleted > 0;
 					returnItems.push(item);
-				} else if (operation === 'store' || operation === 'check_and_store' || operation === 'clean' || operation === 'exists' || operation === 'get') {
+				} else if (
+					operation === 'store' ||
+					operation === 'check_and_store' ||
+					operation === 'clean' ||
+					operation === 'exists' ||
+					operation === 'get'
+				) {
 					const value = this.getNodeParameter('value', itemIndex) as string;
 					const global = this.getNodeParameter('global', itemIndex, false) as boolean;
 					const hash = crypto.createHash('sha256');
@@ -284,7 +290,7 @@ export class Statemachine implements INodeType {
 							item.json.state = value;
 							await client.lPush(`${meta.id}-${executionId}`, key);
 							returnItems.push(item);
-						} else if ( operation === 'check_and_store' && data !== null) {
+						} else if (operation === 'check_and_store' && data !== null) {
 							item.json.state = false;
 							returnItems.push(item);
 						} else {

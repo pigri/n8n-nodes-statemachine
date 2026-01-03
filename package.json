@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-statemachine",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "A simple state machine refers to a programming concept where an application or workflow is divided into a series of states or steps, and the program progresses from one state to the next based on certain conditions or triggers",
   "keywords": [
     "n8n-community-node-package",
@@ -47,6 +47,6 @@
     "n8n-core": "*",
     "n8n-workflow": "*",
     "prettier": "^3.7.4",
-    "typescript": "~4.8.4"
+		"typescript": "~5.3.3"
   }
 }
