@@ -43,10 +43,10 @@ export class Statemachine implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Store',
-						value: 'store',
-						description: 'Set the value of you want to store in state',
-						action: 'Set the value of you want to store in state',
+						name: 'Check&Store',
+						value: 'check_and_store',
+						description: 'Check if the value is already stored and if not, store it',
+						action: 'Check if the value is already stored and if not store it',
 					},
 					{
 						name: 'Clean',
@@ -60,8 +60,32 @@ export class Statemachine implements INodeType {
 						description: 'If your workflow has an error, this mode can handle it',
 						action: 'If your workflow has an error this mode can handle it',
 					},
+					{
+						name: 'Exists',
+						value: 'exists',
+						description: 'Check if the value is already stored',
+						action: 'Check if the value is already stored',
+					},
+					{
+						name: 'Get',
+						value: 'get',
+						description: 'Get the value from the state',
+						action: 'Get the value from the state',
+					},
+					{
+						name: 'Purge',
+						value: 'purge',
+						description: 'Purge the stored value from the state',
+						action: 'Purge the stored value from the state',
+					},
+					{
+						name: 'Store (Deprecated)',
+						value: 'store',
+						description: 'Set the value of you want to store in state',
+						action: 'Set the value of you want to store in state',
+					},
 				],
-				default: 'store',
+				default: 'check_and_store',
 			},
 
 			// ----------------------------------
@@ -73,7 +97,7 @@ export class Statemachine implements INodeType {
 				type: 'string',
 				displayOptions: {
 					show: {
-						operation: ['store', 'clean'],
+						operation: ['clean', 'check_and_store', 'exists', 'get'],
 					},
 				},
 				default: '',
@@ -105,7 +129,7 @@ export class Statemachine implements INodeType {
 				type: 'boolean',
 				displayOptions: {
 					show: {
-						operation: ['store', 'clean'],
+						operation: ['store', 'clean', 'purge', 'exists', 'check_and_store', 'get'],
 					},
 				},
 				default: true,
@@ -117,7 +141,7 @@ export class Statemachine implements INodeType {
 				type: 'boolean',
 				displayOptions: {
 					show: {
-						operation: ['store'],
+						operation: ['check_and_store'],
 					},
 				},
 				default: false,
@@ -132,7 +156,7 @@ export class Statemachine implements INodeType {
 				},
 				displayOptions: {
 					show: {
-						operation: ['store'],
+						operation: ['store', 'check_and_store'],
 						expire: [true],
 					},
 				},
@@ -242,19 +266,32 @@ export class Statemachine implements INodeType {
 					let item: INodeExecutionData;
 					for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 						item = { json: {} };
-						if (operation === 'store' || operation === 'clean') {
+						if (operation === 'purge') {
+							const global = this.getNodeParameter('global', itemIndex, false) as boolean;
+							let key;
+							if (global) {
+								key = `n8n-state-global-*`;
+							} else {
+								key = `n8n-state-workflow-${meta.id}-*`;
+							}
+							const clientDel = util.promisify(client.del).bind(client);
+							// @ts-ignore
+							const deleted = await clientDel(key);
+							item.json.state = deleted > 0;
+							returnItems.push(item);
+						} else if (operation === 'store' || operation === 'check_and_store' || operation === 'clean' || operation === 'exists' || operation === 'get') {
 							const value = this.getNodeParameter('value', itemIndex) as string;
 							const global = this.getNodeParameter('global', itemIndex, false) as boolean;
 							const hash = crypto.createHash('sha256');
 							hash.update(JSON.stringify(value));
 							let key;
 							if (global) {
-								key = `n8n-state-global-${hash.digest('hex')}`;
+								key = `n8n-state-global-*`;
 							} else {
 								key = `n8n-state-workflow-${meta.id}-${hash.digest('hex')}`;
 							}
 
-							if (operation === 'store') {
+							if (operation === 'store' || operation === 'check_and_store') {
 								const data = (await getValue(client, key)) || null;
 
 								if (data === null) {
@@ -274,8 +311,21 @@ export class Statemachine implements INodeType {
 								const clientDel = util.promisify(client.del).bind(client);
 								// @ts-ignore
 								await clientDel(key);
+							} else if (operation === 'exists') {
+								const clientExists = util.promisify(client.exists).bind(client);
+								// @ts-ignore
+								const exists = await clientExists(key);
+								item.json.state = exists > 0;
+								returnItems.push(item);
+							} else if (operation === 'get') {
+								const clientGet = util.promisify(client.get).bind(client);
+								// @ts-ignore
+								const value = await clientGet(key);
+								item.json.state = value;
+								returnItems.push(item);
 							}
 						}
+
 						if (operation === 'error_handling') {
 							const previousExecutionId = this.getNodeParameter(
 								'previousExecutionId',
