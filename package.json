@@ -37,13 +37,12 @@
     ]
   },
   "dependencies": {
-    "redis": "^3.1.1"
+    "redis": "^5.10.0"
   },
   "devDependencies": {
-    "@types/redis": "^2.8.11",
-    "@types/request-promise-native": "~1.0.15",
+    "@types/request-promise-native": "~1.0.21",
     "@typescript-eslint/parser": "~8.51",
-    "eslint-plugin-n8n-nodes-base": "^1.11.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.4",
     "gulp": "^5.0.1",
     "n8n-core": "*",
     "n8n-workflow": "*",

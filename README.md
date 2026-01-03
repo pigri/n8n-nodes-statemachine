@@ -31,9 +31,34 @@ For Docker-based deployments, add the following line before the font installatio
 
 ### How to use
 
-- This node has one external depedency is you need a redis service. You can find a free redis service [here](https://redis.com/redis-enterprise-cloud/pricing/)
+- This node has one external dependency: you need a Redis service. You can find a free Redis service [Upstash](https://upstash.com/) or [Redis Enterprise](https://redis.com/redis-enterprise-cloud/pricing/)
 - My suggestion is 1 trigger 1 state machine
 - Always use error handler node in your workflow
+
+## Available Operations
+
+The StateMachine node supports the following operations:
+
+### Check&Store (Default)
+**Default operation.** Checks if a value is already stored in the state. If the value doesn't exist, it stores it and returns the stored value. If the value already exists, it returns `false` in the state field, allowing your workflow to continue and handle the duplicate case. This prevents duplicate processing while giving you control over how to handle existing values.
+
+### Clean
+Removes a specific stored value from the state using the provided value/key. Returns `true` in the state field if the key was deleted, `false` if it didn't exist.
+
+### Error Handling
+Handles errors in your workflow by cleaning up state from a previous execution. Requires the previous execution ID to identify and remove state entries from failed runs.
+
+### Exists
+Checks if a value already exists in the state without storing it. Returns a boolean indicating whether the value is present.
+
+### Get
+Retrieves a stored value from the state without modifying it. Returns the value if found, or `false` if the key doesn't exist.
+
+### Purge
+Removes all stored values from the state, either globally or at the workflow level. Returns the number of keys deleted.
+
+### Store (Deprecated)
+⚠️ **This operation is deprecated.** Use **Check&Store** instead, which provides the same functionality with additional duplicate prevention. The Store operation will be removed in a future version.
 
 ## Demo
 
@@ -48,6 +73,7 @@ For Docker-based deployments, add the following line before the font installatio
 
 ## Errors
 If you have any error, please open an issue on [Github](https://github.com/pigri/n8n-nodes-statemachine)
+
 
 
 
