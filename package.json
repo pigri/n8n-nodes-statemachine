@@ -47,6 +47,6 @@
     "n8n-core": "*",
     "n8n-workflow": "*",
     "prettier": "^3.7.4",
-		"typescript": "~5.3.3"
+		"typescript": "~5.9.3"
   }
 }
