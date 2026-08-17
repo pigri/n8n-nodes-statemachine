@@ -42,7 +42,7 @@
   "devDependencies": {
     "@types/request-promise-native": "~1.0.21",
     "@typescript-eslint/parser": "~8.58",
-    "eslint-plugin-n8n-nodes-base": "^1.16.4",
+    "eslint-plugin-n8n-nodes-base": "^2.0.0",
     "gulp": "^5.0.1",
     "n8n-core": "*",
     "n8n-workflow": "*",
