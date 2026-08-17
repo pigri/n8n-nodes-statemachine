@@ -37,7 +37,7 @@
     ]
   },
   "dependencies": {
-    "redis": "^5.10.0"
+    "redis": "^6.2.1"
   },
   "devDependencies": {
     "@types/request-promise-native": "~1.0.21",
